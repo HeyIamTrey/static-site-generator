@@ -5,6 +5,7 @@ from inline_markdown import(
     extract_markdown_links,
     split_nodes_image,
     split_nodes_link,
+    text_to_textnodes,
 )
 from textnode import TextNode, TextType
 
@@ -255,6 +256,84 @@ class TestInlineMarkdown(unittest.TestCase):
         new_nodes = split_nodes_link([node])
         self.assertEqual(
             [TextNode("to boot dev", TextType.LINK, "https://www.boot.dev")], new_nodes
+        )
+
+    def test_text_to_textnodes(self):
+        text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        new_nodes = text_to_textnodes(text)
+        self.assertEqual(
+            [
+                TextNode("This is ", TextType.TEXT),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.TEXT),
+                TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+                TextNode(" and a ", TextType.TEXT),
+                TextNode("link", TextType.LINK, "https://boot.dev"),
+            ],
+            new_nodes
+        )
+
+    def test_text_to_textnodes_empty_string(self):
+        text = ""
+        new_nodes = text_to_textnodes(text)
+        self.assertEqual(new_nodes, [])
+
+    def test_text_to_textnodes_no_markdown(self):
+        text = "This text does not include any form of markdown syntax"
+        new_nodes = text_to_textnodes(text)
+        self.assertEqual(
+            [TextNode("This text does not include any form of markdown syntax", TextType.TEXT)],
+            new_nodes
+        )
+
+    def test_text_to_textnodes(self):
+        text = "This text only includes **one** form of markdown syntax"
+        new_nodes = text_to_textnodes(text)
+        self.assertEqual(
+            [
+                TextNode("This text only includes ", TextType.TEXT),
+                TextNode("one", TextType.BOLD),
+                TextNode(" form of markdown syntax", TextType.TEXT)
+            ],
+            new_nodes
+        )
+
+    def test_text_to_textnodes_multiple(self):
+        text = "This text **includes** multiple **bold** words as well as an _italic_ word"
+        new_nodes = text_to_textnodes(text)
+        self.assertEqual(
+            [
+                TextNode("This text ", TextType.TEXT),
+                TextNode("includes", TextType.BOLD),
+                TextNode(" multiple ", TextType.TEXT),
+                TextNode("bold", TextType.BOLD),
+                TextNode(" words as well as an ", TextType.TEXT),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word", TextType.TEXT)
+            ],
+            new_nodes
+        )
+
+    def test_text_to_textnodes_unclosed_delim(self):
+        text = "This text **includes an _unclosed_ delimiter"
+        with self.assertRaises(ValueError):
+            text_to_textnodes(text)
+
+    def test_text_to_textnodes_empty_delim(self):
+        text = "This text includes **** an _empty_ delimiter"
+        new_nodes = text_to_textnodes(text)
+        self.assertEqual(
+            [
+                TextNode("This text includes ", TextType.TEXT),
+                TextNode(" an ", TextType.TEXT),
+                TextNode("empty", TextType.ITALIC),
+                TextNode(" delimiter", TextType.TEXT)
+            ],
+            new_nodes
         )
 
 if __name__ == "__main__":
