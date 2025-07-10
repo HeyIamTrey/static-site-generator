@@ -42,9 +42,7 @@ class ParentNode(HTMLNode):
             raise ValueError("invalid HTML: no tag")
         if self.children is None:
             raise ValueError("invalid HTML: no children")
-        result = f"<{self.tag}>"
+        result = ""
         for child in self.children:
             result += child.to_html()
-        return result + f"</{self.tag}>"
-
-        
+        return f"<{self.tag}{self.props_to_html()}>{result}</{self.tag}>"
