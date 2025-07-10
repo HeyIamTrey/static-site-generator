@@ -1,8 +1,18 @@
-from textnode import TextNode, TextType
-from htmlnode import HTMLNode, LeafNode, ParentNode
+import shutil
+import os
+
+from copystatic import copy_static
+
+dir_path_static = "./static"
+dir_path_public = "./public"
 
 def main():
-    text_node = TextNode("This is some anchor text", TextType.LINK, "https://bootdev.com")
-    print(text_node)
+    if os.path.isdir(dir_path_public):
+        shutil.rmtree(dir_path_public)
     
+    print("Copying static files to public directory...")
+    copy_static(dir_path_static, dir_path_public)
+
+
+
 main()
