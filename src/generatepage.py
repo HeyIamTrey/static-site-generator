@@ -9,7 +9,7 @@ def extract_title(markdown):
             return line.lstrip("#").strip()
     raise ValueError("Syntax Error: There is no page title (no h1/# header)")
 
-def generate_page(src_path, template_path, dest_path):
+def generate_page(src_path, template_path, dest_path, basepath):
     dest_path = dest_path.replace(".md", ".html")
     print(f"Generating page from {src_path} to {dest_path} using {template_path}.")
     
@@ -26,6 +26,7 @@ def generate_page(src_path, template_path, dest_path):
     # Turning the Markdown into HTML and extracting the title from the Markdown
     node = markdown_to_html_node(md)
     html = node.to_html()
+    html = html.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
     title = extract_title(md)
 
     # Replacing the Title and Content in the Template with the Title and Content in the Source
@@ -38,14 +39,14 @@ def generate_page(src_path, template_path, dest_path):
     with open(dest_path, "w") as f:
         f.write(new_page)
 
-def generate_page_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_page_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     for file in os.listdir(dir_path_content):
         src_path = os.path.join(dir_path_content, file)
         dest_path = os.path.join(dest_dir_path, file)
         if os.path.isfile(src_path):
             if src_path.endswith(".md"):
-                generate_page(src_path, template_path, dest_path)
+                generate_page(src_path, template_path, dest_path, basepath)
         else:
             if not os.path.exists(dest_path):
                 os.mkdir(dest_path)
-            generate_page_recursive(src_path, template_path, dest_path)
+            generate_page_recursive(src_path, template_path, dest_path, basepath)
