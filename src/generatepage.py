@@ -10,6 +10,7 @@ def extract_title(markdown):
     raise ValueError("Syntax Error: There is no page title (no h1/# header)")
 
 def generate_page(src_path, template_path, dest_path):
+    dest_path = dest_path.replace(".md", ".html")
     print(f"Generating page from {src_path} to {dest_path} using {template_path}.")
     
     # Reading the markdown file to a variable
@@ -36,3 +37,15 @@ def generate_page(src_path, template_path, dest_path):
         os.makedirs(dest_dir_path, exist_ok=True)
     with open(dest_path, "w") as f:
         f.write(new_page)
+
+def generate_page_recursive(dir_path_content, template_path, dest_dir_path):
+    for file in os.listdir(dir_path_content):
+        src_path = os.path.join(dir_path_content, file)
+        dest_path = os.path.join(dest_dir_path, file)
+        if os.path.isfile(src_path):
+            if src_path.endswith(".md"):
+                generate_page(src_path, template_path, dest_path)
+        else:
+            if not os.path.exists(dest_path):
+                os.mkdir(dest_path)
+            generate_page_recursive(src_path, template_path, dest_path)
