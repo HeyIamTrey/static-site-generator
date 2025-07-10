@@ -26,11 +26,11 @@ def generate_page(src_path, template_path, dest_path, basepath):
     # Turning the Markdown into HTML and extracting the title from the Markdown
     node = markdown_to_html_node(md)
     html = node.to_html()
-    html = html.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
     title = extract_title(md)
 
     # Replacing the Title and Content in the Template with the Title and Content in the Source
     new_page = template.replace("{{ Title }}", title).replace("{{ Content }}", html)
+    new_page = new_page.replace('href="/', f'href="{basepath}').replace('src="/', f'src="{basepath}')
 
     # Check if the destination path exists, creating it if it doesn't and, writing the new page to the destination file
     dest_dir_path = os.path.dirname(dest_path)
